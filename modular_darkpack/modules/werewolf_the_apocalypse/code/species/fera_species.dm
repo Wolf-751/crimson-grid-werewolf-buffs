@@ -341,3 +341,143 @@
 
 /datum/movespeed_modifier/shifter/feral
 	multiplicative_slowdown = -0.35
+//CRIMSON GRID ADDITION - rage gaining and draining system for shifters
+
+/datum/splat/werewolf/shifter
+	COOLDOWN_DECLARE(rage_damage_cd)
+	COOLDOWN_DECLARE(rage_wound_cd)
+	COOLDOWN_DECLARE(rage_decay_cd)
+
+/datum/splat/werewolf/shifter/on_gain()
+	. = ..()
+
+	owner.set_species(/datum/species/human/shifter/homid)
+
+	RegisterSignal(
+		owner,
+		COMSIG_MOB_AFTER_APPLY_DAMAGE,
+		PROC_REF(on_owner_damage)
+	)
+
+	RegisterSignal(
+		owner,
+		COMSIG_CARBON_GAIN_WOUND,
+		PROC_REF(on_owner_wound)
+	)
+
+	RegisterSignal(
+		owner,
+		COMSIG_LIVING_DEATH,
+		PROC_REF(revert_to_breed_form)
+	)
+
+	START_PROCESSING(SSprocessing, src)
+
+/datum/splat/werewolf/shifter/on_lose_or_destroy()
+	. = ..()
+
+	STOP_PROCESSING(SSprocessing, src)
+
+	if(!QDELETED(owner))
+		UnregisterSignal(
+			owner,
+			COMSIG_MOB_AFTER_APPLY_DAMAGE
+		)
+
+		UnregisterSignal(
+			owner,
+			COMSIG_CARBON_GAIN_WOUND
+		)
+
+		UnregisterSignal(
+			owner,
+			COMSIG_LIVING_DEATH
+		)
+
+/datum/splat/werewolf/shifter/proc/gain_rage(amount = 1)
+	if(!owner)
+		return FALSE
+
+	if(owner.stat == DEAD)
+		return FALSE
+
+	if(!uses_rage)
+		return FALSE
+
+	if(amount <= 0)
+		return FALSE
+
+	if(rage >= permanent_rage)
+		return FALSE
+
+	amount = min(amount, permanent_rage - rage)
+
+	if(amount <= 0)
+		return FALSE
+
+	adjust_rage(amount, FALSE)
+
+	// Gaining Rage keeps Rage from decaying.
+	COOLDOWN_START(src, rage_decay_cd, 1 MINUTES)
+
+	return TRUE
+
+/datum/splat/werewolf/shifter/proc/on_owner_damage(
+	datum/source,
+	damage_dealt,
+	damagetype,
+	def_zone,
+	blocked,
+	wound_bonus,
+	exposed_wound_bonus,
+	sharpness,
+	attack_direction,
+	attacking_item,
+	wound_clothing
+)
+	SIGNAL_HANDLER
+
+	if(damage_dealt < 30)
+		return
+
+	if(!COOLDOWN_FINISHED(src, rage_damage_cd))
+		return
+
+	if(gain_rage(1))
+		COOLDOWN_START(src, rage_damage_cd, 5 SECONDS)
+
+
+
+/datum/splat/werewolf/shifter/proc/on_owner_wound(
+	datum/source,
+	datum/wound/wound,
+	obj/item/bodypart/limb
+)
+	SIGNAL_HANDLER
+
+	if(!COOLDOWN_FINISHED(src, rage_wound_cd))
+		return
+
+	if(gain_rage(1))
+		COOLDOWN_START(src, rage_wound_cd, 15 SECONDS)
+/datum/splat/werewolf/shifter/on_lose_or_destroy()
+	. = ..()
+
+	if(!QDELETED(owner))
+		UnregisterSignal(
+			owner,
+			COMSIG_MOB_AFTER_APPLY_DAMAGE
+		)
+
+		UnregisterSignal(
+			owner,
+			COMSIG_CARBON_GAIN_WOUND
+		)
+
+		UnregisterSignal(
+			owner,
+			COMSIG_LIVING_DEATH
+		)
+
+
+
