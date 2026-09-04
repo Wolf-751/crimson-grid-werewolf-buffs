@@ -399,7 +399,7 @@
 	amount = min(amount, permanent_rage - rage)
 	if(amount <= 0)
 		return FALSE
-	adjust_rage(amount, FALSE)
+	adjust_rage(amount, FALSE, FALSE)
 	COOLDOWN_START(src, rage_decay_cd, 1 MINUTES)
 	return TRUE
 
@@ -428,7 +428,7 @@
 	if(!COOLDOWN_FINISHED(src, aggravated_decay_cd))
 		return
 	if(gain_rage(2))
-		COOLDOWN_START(src, aggravated_decay_cd, 30 SECONDS)
+		COOLDOWN_START(src, aggravated_decay_cd, 2 MINUTES)
 
 /datum/splat/werewolf/shifter/proc/on_owner_wound(
 	datum/source,
