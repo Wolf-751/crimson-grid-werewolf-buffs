@@ -1,4 +1,5 @@
 #define HEAL_AGGRAVATED_DAMAGE 50
+#define RAGE_HEAL_SUCCESSES_NEEDED 1
 
 /datum/action/cooldown/power/gift/rage_heal
 	name = "Rage heal"
@@ -17,7 +18,9 @@
 /datum/storyteller_roll/rage_heal
 	bumper_text = "Rage heal"
 	difficulty = 8
+	successes_needed = RAGE_HEAL_SUCCESSES_NEEDED
 	applicable_stats = list(STAT_STAMINA, STAT_SURVIVAL)
+	numerical = TRUE
 	roll_output_type = ROLL_PRIVATE
 
 /datum/action/cooldown/power/gift/rage_heal/IsAvailable(feedback = FALSE)
@@ -50,14 +53,21 @@
 		W.emote("sigh", forced = TRUE)
 		to_chat(owner, span_warning("You fail to harness your rage to heal your wounds!"))
 		return FALSE
+	if(roll_result < RAGE_HEAL_SUCCESSES_NEEDED)
+		W.emote("sigh", forced = TRUE)
+		to_chat(owner, span_warning("You fail to harness your rage to heal your wounds!"))
+		return FALSE
 	W.emote("howl", forced = TRUE)
 	var/agg_before = W.get_agg_loss()
 	if(agg_before <= 0)
 		to_chat(W, span_warning("The rage rises within you, but it fails to find any aggravated damage to mend."))
 		return FALSE
 	var/heal_amount = HEAL_AGGRAVATED_DAMAGE
+	if(roll_result > RAGE_HEAL_SUCCESSES_NEEDED)
+		heal_amount += (roll_result - RAGE_HEAL_SUCCESSES_NEEDED) * 5
 	heal_amount = min(heal_amount, agg_before)
 	to_chat(W, span_warning("Your rage tears through the aggravated wounds on your body and heals you..."))
 	owner.visible_message(span_warning("[owner]'s aggravated wounds are closing at a terrifingly rapid pace!"))
+	W.heal_ordered_damage(heal_amount, list(AGGRAVATED))
 	W.update_damage_overlays()
 	return TRUE
