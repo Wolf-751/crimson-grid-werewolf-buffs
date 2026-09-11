@@ -9,7 +9,6 @@
 	rage_cost = 2
 
 	var/datum/storyteller_roll/rage_heal/rage_heal_roll = new /datum/storyteller_roll/rage_heal
-	var/heal_amount = 50
 
 /datum/action/cooldown/power/gift/rage_heal/New()
 	. = ..()
@@ -54,16 +53,11 @@
 	W.emote("howl", forced = TRUE)
 	var/agg_before = W.get_agg_loss()
 	if(agg_before <= 0)
-		to_chat(W, span_warning("Your body has no aggravated damage to mend."))
-		return FALSE
-	var/successes = rage_heal_roll.last_sucess_amount
-	var/heal_amount = HEAL_AGGRAVATED_DAMAGE + (max(successes - 4, 0) * 30)
-	heal_amount = min(heal_amount, agg_before)
-	to_chat(W, span_warning("Your supernatural rage tears through your aggravated wounds and heals you..."))
-	var/healed_amount = W.adjust_agg_loss(-heal_amount,TRUE,TRUE)
-	if(healed_amount <= 0)
 		to_chat(W, span_warning("The rage rises within you, but it fails to find any aggravated damage to mend."))
 		return FALSE
-	owner.visible_message(span_warning("[owner]'s festering wounds are closing at a terrifingly rapid pace!"))
+	var/heal_amount = HEAL_AGGRAVATED_DAMAGE
+	heal_amount = min(heal_amount, agg_before)
+	to_chat(W, span_warning("Your rage tears through the aggravated wounds on your body and heals you..."))
+	owner.visible_message(span_warning("[owner]'s aggravated wounds are closing at a terrifingly rapid pace!"))
 	W.update_damage_overlays()
 	return TRUE
