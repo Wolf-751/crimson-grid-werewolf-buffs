@@ -91,7 +91,6 @@
 	. = ..()
 	var/datum/component/regenerator/regenerator = species_fera_war.GetComponent(/datum/component/regenerator)
 	if(!regenerator)
-		species_fera_war.AddComponent(/datum/component/regenerator, regeneration_delay = 5 SECONDS, heals_wounds = TRUE, brute_per_second = 20, burn_per_second = 10, tox_per_second = 5, oxy_per_second =5, ignore_damage_types = list(STAMINA , AGGRAVATED), outline_colour = COLOR_RED)
 		species_fera_war.AddComponent(/datum/component/regenerator, regeneration_delay = 1 SECONDS, heals_wounds = TRUE, brute_per_second = 15, tox_per_second = 5, oxy_per_second = 5, ignore_damage_types = list(AGGRAVATED,BURN), outline_colour = COLOR_RED)
 		regenerator = species_fera_war.GetComponent(/datum/component/regenerator)
 	regenerator?.start_regenerating()
@@ -101,7 +100,6 @@
 	. = ..()
 	qdel(human.GetComponent(/datum/component/regenerator))
 
-//CRIMSON GRID EDIT END
 /datum/species/human/shifter/dire/on_species_gain(mob/living/carbon/human/species_fera_dire, datum/species/old_species, pref_load, regenerate_icons)
 	. = ..()
 	var/datum/component/regenerator/regenerator = species_fera_dire.GetComponent(/datum/component/regenerator)
