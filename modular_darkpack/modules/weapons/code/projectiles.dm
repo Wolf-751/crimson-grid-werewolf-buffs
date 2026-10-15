@@ -166,7 +166,7 @@
 	. = ..()
 	if(iscarbon(target))
 		var/mob/living/carbon/M = target
-		M.Stun(4)
+		M.Immobilize(4) //CRIMSON GRID EDIT - original M.Stun(4)
 
 /obj/projectile/bullet/darkpack/dragonsbreath
 	name = "12g shotgun incendiary pellet"
